@@ -2,4 +2,4 @@
 include LICENSE
 
 # Include all ini files in packages under src
-recursive-include src
+recursive-include src *.ini
