@@ -1,10 +1,10 @@
-============================
-parameter-store-task
-============================
+# parameter-store-task
+This is a generic Lambda function that sets or gets parameters from AWS Parameter Store
 
-.. _APL2: http://www.apache.org/licenses/LICENSE-2.0.txt
+# Handler Method
+function.handler
 
-AWS Lambda designed to get and put parameters from AWS Parameter Store for AWS Step Functions
+# Lambda package location
+https://s3.amazonaws.com/lambdalambdalambda-repo/quinovas/parameter-store-task/parameter-store-task-0.0.1.zip
 
 
-License: `APL2`_
