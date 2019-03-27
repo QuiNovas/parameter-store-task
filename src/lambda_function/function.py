@@ -1,5 +1,7 @@
 import boto3
+import json	
 import logging.config
+import os
 
 kms_key = os.environ['SSM_KMS_KEY_ARN']
 client = boto3.client('ssm')
@@ -14,18 +16,19 @@ def handler(event, context):
 		action = body['Action']
 		if action == 'GetParameter':
 			if 'Name' in body:
-				response = get_parameter_from_store(body['Name'])
+				return get_parameter_from_store(body['Name'])
 			elif 'Names' in body:
-				response = get_parameter_from_store(body['Names'])
+				return get_parameter_from_store(body['Names'])
 			else:
 				logger.info('Missing the parameter name in the event')
 		elif action == 'PutParameter':
-				response = put_parameter_to_store(body['Name'], body['Type'], body['Value'])
-            					
-    else:
+			return put_parameter_to_store(body['Name'], body['Type'], body['Value'])
+		else:
+			logger.info('Undefined action. Cannot complete the request')            					
+	else:
 		logger.info('Missing action (get/put) in event body')	
-	return response
-	
+
+		
 def get_parameter_from_store(name):
 	if isinstance(name, list):
 		parameter_list = []
@@ -38,12 +41,18 @@ def get_parameter_from_store(name):
 		return parameter_list
 	else:
 		response = client.get_parameter(Name=name, WithDecryption=True)
-		return response['Parameter']['Value']
+		return 'Value:{}'.format(response['Parameter']['Value'])
 		
+
 		
 def put_parameter_to_store(name, type_of_parameter, value):
 	if type_of_parameter == "SecureString":
-		response = client.put_parameter(KeyId=kms_key, Name=name, Type=type, Value=value)
-    elif type_of_parameter == "String":
-		response = client.put_parameter(Name=name, Type=type, Value=value)
-	return response
+		response = client.put_parameter(KeyId=kms_key, Name=name, Type=type_of_parameter, Value=value)
+		return response['Version']
+	elif type_of_parameter == "String":
+		response = client.put_parameter(Name=name, Type=type_of_parameter, Value=value)
+		return 'Version:{}'.format(response['Version'])
+	else:
+		logger.info('Unexpected type. Cannot put the parameter in store')
+		
+	#TODO for StringList
