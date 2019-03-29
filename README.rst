@@ -19,12 +19,11 @@ Required Permissions
 - AWS Parameter Store  :GetParameter
 - AWS Parameter Store  :GetParameters
 - AWS Parameter Store  :GetParameterByPath
-- AWS Parameter Store  :GetParameterHistory
 - AWS Parameter Store  :PutParameter
 
 Environment Variables
 ---------------------
-**SSM_KMS_KEY_ARN** (Required)
+**SSM_KMS_KEY_ARN** (Optional)
    The arn of the KMS key used for encryption and decryption of SecureString parameters.
 
 Request Syntax
