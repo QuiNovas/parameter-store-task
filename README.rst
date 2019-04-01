@@ -16,55 +16,60 @@ AWS Parameter Store
 
 Required Permissions
 --------------------
-- AWS Parameter Store  :GetParameter
 - AWS Parameter Store  :GetParameters
-- AWS Parameter Store  :GetParameterByPath
+- AWS Parameter Store  :GetParametersByPath
 - AWS Parameter Store  :PutParameter
-
-Environment Variables
----------------------
-**SSM_KMS_KEY_ARN** (Optional)
-   The arn of the KMS key used for encryption and decryption of SecureString parameters.
 
 Request Syntax
 ---------------------
 The event is passed in as a JSON object. For example,
 
-{
-  "GetParameters": {
-    "Names": [] - this will always be an array, for one parameter it will simply be an array of one
-  },
-  "GetParametersByPath": {
-    "Path": "" - required,
-    "Recursive": true | false - required
-  },
-  "PutParameter": {
-    "Name": "", - required
-    "Description": "", - optional
-    "Value": "" | [], - required. If a list, will be converted to a StringList
-    "Secure": true | false, - defaults to false. Throws error if true and "Value" is a []
-    "KeyId": "",  - optional
-    "Overwrite": true|false, - optional, default is false
+.. code-block:: JSON
+
+  {
+    "GetParameters": {
+      "Names": [] - this will always be an array, for one parameter it will simply be an array of one
+    },
+    "GetParametersByPath": {
+      "Path": "" - required,
+      "Recursive": true | false - required
+    },
+    "PutParameter": {
+      "Name": "", - required
+      "Description": "", - optional
+      "Value": "" | [], - required. If a list, will be converted to a StringList
+      "Secure": true | false, - defaults to false. Throws error if true and "Value" is a []
+      "KeyId": "",  - optional
+      "Overwrite": true|false, - optional, default is false
+    }
   }
-}
 
 Response Syntax
 ---------------------
-For GetParameter :
+For GetParameters :
 
-"Parameters": {
-      "name": { - the name of the parameter is the key
-          "Type": "String" | "StringList" | "SecureString",
-          "Value': 'string' | ['string'], - the [] is if it was a StringList
-          "Version": 123,
-          "Selector": "string",
-          "SourceResult": "string",
-          "LastModifiedDate": "datetime",
-          "ARN": "string"
-      },
-}
+.. code-block:: JSON
+
+  {
+    "Parameters": {
+          "name": { - the name of the parameter is the key
+              "Type": "String" | "StringList" | "SecureString",
+              "Value': 'string' | ['string'], - the [] is if it was a StringList
+              "Version": 123,
+              "Selector": "string",
+              "SourceResult": "string",
+              "LastModifiedDate": "datetime",
+              "ARN": "string"
+          },
+    }
+  }
 
 For PutParameter:
- "Version": 123
+
+.. code-block:: JSON
+
+  {
+    "Version": 123
+  }
 
 License: `APL2`_
