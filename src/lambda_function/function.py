@@ -3,7 +3,7 @@ import json
 import logging.config
 import os
 
-# KMS_KEY = os.environ['SSM_KMS_KEY_ARN']
+KMS_KEY = os.environ['SSM_KMS_KEY_ARN']
 client = boto3.client('ssm')
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -45,7 +45,7 @@ def _get_parameter_from_store_by_path(path, recursive):
 	
 
 def _put_parameter_to_store(put_param):
-	
+	if 'KeyId' in put_param:
 		response = client.put_parameter(
 								Name=put_param['Name'],
 								Type=put_param['Type'],
