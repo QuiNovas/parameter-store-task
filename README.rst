@@ -28,27 +28,43 @@ Environment Variables
 
 Request Syntax
 ---------------------
-The event is passed in as a JSON object. For example, to get a parameter from AWS parameter store, the request JSON is as follows
+The event is passed in as a JSON object. For example,
 
-{   
-  
-  "Body" :
-    {
-      
-      "Action":"GetParameter",
-      "Name": "string",
-      "WithDecryption": boolean
-   
-    }
-
+{
+  "GetParameters": {
+    "Names": [] - this will always be an array, for one parameter it will simply be an array of one
+  },
+  "GetParametersByPath": {
+    "Path": "" - required,
+    "Recursive": true | false - required
+  },
+  "PutParameter": {
+    "Name": "", - required
+    "Description": "", - optional
+    "Value": "" | [], - required. If a list, will be converted to a StringList
+    "Secure": true | false, - defaults to false. Throws error if true and "Value" is a []
+    "KeyId": "",  - optional
+    "Overwrite": true|false, - optional, default is false
+  }
 }
 
 Response Syntax
 ---------------------
-{
-      "Name":"string",
-      "Value":"string"
+For GetParameter :
 
+"Parameters": {
+      "name": { - the name of the parameter is the key
+          "Type": "String" | "StringList" | "SecureString",
+          "Value': 'string' | ['string'], - the [] is if it was a StringList
+          "Version": 123,
+          "Selector": "string",
+          "SourceResult": "string",
+          "LastModifiedDate": "datetime",
+          "ARN": "string"
+      },
 }
+
+For PutParameter:
+ "Version": 123
 
 License: `APL2`_
