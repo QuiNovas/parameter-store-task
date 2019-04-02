@@ -23,21 +23,30 @@ Required Permissions
 
 Request Syntax
 ---------------------
-The event is passed in as a JSON object. For example,
+The event is passed in as a JSON object. Examples:
 
-.. code-block:: JSON
+.. code::
 
   {
     "GetParameter": {
-      "Name": "name"
-    },
+      "Name": "name" - required
+    }
+  }
+
+  {
     "GetParameters": {
-      "Names": ["name1", "name2]
-    },
+      "Names": ["name1", "name2] - required
+    }
+  }
+
+  {
     "GetParametersByPath": {
       "Path": "" - required,
       "Recursive": true | false - required
-    },
+    }
+  }
+
+  {
     "PutParameter": {
       "Name": "", - required
       "Description": "", - optional
@@ -50,17 +59,18 @@ The event is passed in as a JSON object. For example,
 
 Response Syntax
 ---------------------
-For GetParameter and GetParameters and GetParametersByPath :
+For GetParameter and GetParameters and GetParametersByPath the parameters
+are returned in a (nested) map:
 
-.. code-block:: JSON
+.. code::
 
   {
     "name": "value" | ["value1", "value2"] | {},
   }
 
-For PutParameter:
+For PutParameter, the version number is returned:
 
-.. code-block:: text
+.. code::
 
   123
 
