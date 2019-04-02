@@ -8,7 +8,9 @@ logger.setLevel(logging.INFO)
 
 def handler(event, context):
 	logger.debug('Event :{}'.format(event))
-	if 'GetParameters' in event:
+	if 'GetParameter' in event:
+		return _get_parameters([event['GetParameter']['Name']])
+	elif 'GetParameters' in event:
 		return _get_parameters(event['GetParameters']['Names'])
 	elif 'GetParametersByPath' in event:
 		return _get_parameters_by_path(event['GetParametersByPath']['Path'], event['GetParametersByPath']['Recursive'])
@@ -22,7 +24,7 @@ def _get_parameters(names):
 		Names=names,
 		WithDecryption=True
 	)
-	return _transform_return_parameters(response.get('Parameters', {}))
+	return _transform_return_parameters(response.get('Parameters', []))
 
 
 def _get_parameters_by_path(path, recursive):
@@ -31,19 +33,17 @@ def _get_parameters_by_path(path, recursive):
 		Recursive=recursive,
 		WithDecryption=True
 	)
-	return _transform_return_parameters(response.get('Parameters', {}))
+	return _transform_return_parameters(response.get('Parameters', []))
 
 
 def _transform_return_parameters(parameters):
 	transformed_parameters = {}
 	for parameter in parameters:
-		name = parameter.pop('Name')
-		if parameter['Type'] == 'StringList':
-			parameter['Value'] = parameter['Value'].split(',')
-		transformed_parameters[name] = parameter
-	return {
-		'Parameters': transformed_parameters
-	}
+		transformed_parameters[parameter['Name']] = \
+			parameter['Value'] if \
+				parameter['Type'] != 'StringList' else \
+					parameter['Value'].split(',')
+	return transformed_parameters
 
 
 def _put_parameter(parameter):
@@ -59,7 +59,7 @@ def _put_parameter(parameter):
 		response = client.put_parameter(
 			Name=parameter['Name'],
 			Type=parameter_type,
-			Value=value,
+			Value=str(value),
 			KeyId=parameter['KeyId'],
 			Description=parameter.get('Description', ''),
 			Overwrite=parameter.get('Overwrite', False)
@@ -68,7 +68,7 @@ def _put_parameter(parameter):
 		response = client.put_parameter(
 			Name=parameter['Name'],
 			Type=parameter_type,
-			Value=value,
+			Value=str(value),
 			Description=parameter.get('Description', ''),
 			Overwrite=parameter.get('Overwrite', False)
 		)

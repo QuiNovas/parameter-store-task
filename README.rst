@@ -16,9 +16,10 @@ AWS Parameter Store
 
 Required Permissions
 --------------------
-- AWS Parameter Store  :GetParameters
-- AWS Parameter Store  :GetParametersByPath
-- AWS Parameter Store  :PutParameter
+- ssm:GetParameter
+- ssm:GetParameters
+- ssm:GetParametersByPath
+- ssm:PutParameter
 
 Request Syntax
 ---------------------
@@ -27,8 +28,11 @@ The event is passed in as a JSON object. For example,
 .. code-block:: JSON
 
   {
+    "GetParameter": {
+      "Name": "name"
+    },
     "GetParameters": {
-      "Names": [] - this will always be an array, for one parameter it will simply be an array of one
+      "Names": ["name1", "name2]
     },
     "GetParametersByPath": {
       "Path": "" - required,
@@ -46,30 +50,26 @@ The event is passed in as a JSON object. For example,
 
 Response Syntax
 ---------------------
-For GetParameters :
+For GetParameter, GetParameters and GetParametersByPath :
 
 .. code-block:: JSON
 
   {
-    "Parameters": {
-          "name": { - the name of the parameter is the key
-              "Type": "String" | "StringList" | "SecureString",
-              "Value': 'string' | ['string'], - the [] is if it was a StringList
-              "Version": 123,
-              "Selector": "string",
-              "SourceResult": "string",
-              "LastModifiedDate": "datetime",
-              "ARN": "string"
-          },
-    }
+    "name": { - the name of the parameter is the key
+        "Type": "String" | "StringList" | "SecureString",
+        "Value': 'string' | ['string'], - the [] is if it was a StringList
+        "Version": 123,
+        "Selector": "string",
+        "SourceResult": "string",
+        "LastModifiedDate": "datetime",
+        "ARN": "string"
+    },
   }
 
 For PutParameter:
 
-.. code-block:: JSON
+.. code-block:: text
 
-  {
-    "Version": 123
-  }
+  123
 
 License: `APL2`_
