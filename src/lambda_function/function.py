@@ -72,6 +72,4 @@ def _put_parameter(parameter):
 			Description=parameter.get('Description', ''),
 			Overwrite=parameter.get('Overwrite', False)
 		)
-	return {
-		'Version': response['Version']
-	}
+	return response['Version']

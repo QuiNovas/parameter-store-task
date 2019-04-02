@@ -55,15 +55,7 @@ For GetParameter, GetParameters and GetParametersByPath :
 .. code-block:: JSON
 
   {
-    "name": { - the name of the parameter is the key
-        "Type": "String" | "StringList" | "SecureString",
-        "Value': 'string' | ['string'], - the [] is if it was a StringList
-        "Version": 123,
-        "Selector": "string",
-        "SourceResult": "string",
-        "LastModifiedDate": "datetime",
-        "ARN": "string"
-    },
+    "name": "value" | ["value1", "value2"],
   }
 
 For PutParameter:
