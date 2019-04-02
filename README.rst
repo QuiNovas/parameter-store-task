@@ -6,7 +6,7 @@ parameter-store-task
 
 This lambda function is designed to get and put parameters from AWS Parameter
 Store for AWS Step Functions. The step functions will invoke the lambda based
-on the input event and state machine definition. 
+on the input event and state machine definition.
 This function should allow for
 
 #. Getting a parameter, multiple parameters or parameters by path
@@ -14,7 +14,7 @@ This function should allow for
 
 Required AWS Resources
 ----------------------
-AWS Parameter Store 
+AWS Parameter Store
 
 Required Permissions
 --------------------
