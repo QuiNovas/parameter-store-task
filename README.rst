@@ -50,12 +50,12 @@ The event is passed in as a JSON object. For example,
 
 Response Syntax
 ---------------------
-For GetParameter, GetParameters and GetParametersByPath :
+For GetParameter and GetParameters and GetParametersByPath :
 
 .. code-block:: JSON
 
   {
-    "name": "value" | ["value1", "value2"],
+    "name": "value" | ["value1", "value2"] | {},
   }
 
 For PutParameter:
