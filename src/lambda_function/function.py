@@ -9,61 +9,91 @@ logger.setLevel(logging.INFO)
 def handler(event, context):
 	logger.debug('Event :{}'.format(event))
 	if 'GetParameter' in event:
-		return _get_parameters([event['GetParameter']['Name']])
+		return _get_parameter(event['GetParameter'])
 	elif 'GetParameters' in event:
-		return _get_parameters(event['GetParameters']['Names'])
+		return _get_parameters(event['GetParameters'])
 	elif 'GetParametersByPath' in event:
-		return _get_parameters_by_path(event['GetParametersByPath']['Path'], event['GetParametersByPath']['Recursive'])
+		return _get_parameters_by_path(event['GetParametersByPath'])
 	elif 'PutParameter' in event:
 		return _put_parameter(event['PutParameter'])
 	raise ValueError('Event does not contain expected parameters. Event: {}'.format(event)) 
 	
+def _get_parameter(arguments):
+	response = client.get_parameter(
+		Name=arguments['Name'],
+		WithDecryption=True
+	)
+	result_format = arguments.get('ResultFormat', 'NAME_VALUE')
+	if result_format == 'VALUE_ONLY':
+		return _transform_value(response['Parameter']['Value'], response['Parameter']['Type'])
+	elif result_format == 'NAME_VALUE':
+		return _transform_parameter(response['Parameter'], result_format)
+	else:
+		raise ValueError('Unknown ResultFormat {} for GetParameter'.format(result_format))
 
-def _get_parameters(names):
+def _get_parameters(arguments):
 	response = client.get_parameters(
-		Names=names,
+		Names=arguments['Names'],
 		WithDecryption=True
 	)
-	return _transform_return_parameters(response.get('Parameters', []))
+	result_format = arguments.get('ResultFormat', 'NAME_VALUE')
+	if result_format == 'NAME_VALUE' or result_format == 'NESTED_MAP':
+		result = {}
+		for parameter in response['Parameters']:
+			result = {**result, **_transform_parameter(parameter, result_format)}
+		return result
+	else:
+		raise ValueError('Unknown ResultFormat {} for GetParameters'.format(result_format))
 
-
-def _get_parameters_by_path(path, recursive):
+def _get_parameters_by_path(arguments):
 	response = client.get_parameters_by_path(
-		Path=path, 
-		Recursive=recursive,
+		Path=arguments['Path'], 
+		Recursive=arguments.get('Recursive', False),
 		WithDecryption=True
 	)
-	return _transform_return_parameters(response.get('Parameters', []))
+	result_format = arguments.get('ResultFormat', 'NAME_VALUE')
+	if result_format == 'NAME_VALUE' or result_format == 'NESTED_MAP':
+		result = {}
+		for parameter in response['Parameters']:
+			result = {**result, **_transform_parameter(parameter, result_format, '' if not arguments.get('RelativePath') else arguments['Path'])}
+		return result
+	else:
+		raise ValueError('Unknown ResultFormat {} for GetParameters'.format(result_format))
 
-def _transform_return_parameters(parameters):
-	transformed_parameters = {}
-	for parameter in parameters:
-		name = parameter['Name']
-		value = parameter['Value'] if parameter['Type'] != 'StringList' else parameter['Value'].split(',')
-		if name.startswith('/'):
-			name_elements = name[1:].split('/')
-			node = _make_or_traverse_path(transformed_parameters, name_elements[:-1])
-			if not isinstance(node, dict):
-				raise ValueError('Parameter {} is both a node and a leaf. This is not supported.'.format('/'.join(name_elements[:-1])))
-			node[name_elements[-1:][0]] = value
+def _transform_parameter(parameter, result_format, relative_path=''):
+	name = parameter['Name'][relative_path.rfind('/')+1:]
+	if result_format == 'NAME_VALUE':
+		return {
+			name: _transform_value(parameter['Value'], parameter['Type'])
+		}
+	elif result_format == 'NESTED_MAP':
+		if parameter['Name'].startswith('/'):
+			name_elements = parameter['Name'][1:].split('/')
+			result = _make_path({}, name_elements[:-1])
+			result[name_elements[-1:][0]] = _transform_value(parameter['Value'], parameter['Type'])
 		else:
-			transformed_parameters[name] = value
-	return transformed_parameters
+			result = {
+				name: _transform_value(parameter['Value'], parameter['Type'])
+			}
+		return result
 
+def _transform_value(value, value_type):
+	if value_type == 'String' or value_type == 'SecureString':
+		return value
+	elif value_type == 'StringList':
+		return value.split(',')
+	else:
+		raise ValueError('Unknown Type {}'.format(value_type))
 
-def _make_or_traverse_path(parameters, elements):
+def _make_path(parameters, elements):
 	if not elements:
 		return parameters
-	if elements[0] not in parameters:
-		parameters[elements[0]] = {}
+	parameters[elements[0]] = {}
 	return _make_or_traverse_path(parameters[elements[0]], elements[1:])
-
 
 def _put_parameter(parameter):
 	if isinstance(parameter['Value'], (list, tuple)):
-		if parameter.get('Secure', False):
-			raise ValueError('Cannot have secure StringList')
-		parameter_type = 'StringList'
+		parameter_type = 'SecureString' if parameter.get('Secure', False) else 'StringList'
 		value = ','.join(parameter['Value'])
 	else:
 		parameter_type = 'SecureString' if parameter.get('Secure', False) else 'String'
