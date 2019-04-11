@@ -148,7 +148,7 @@ Behavior
 **GetParameter, GetParameters, GetParametersByPath**
   - If the parameter value is of type ``StringList`` then a ``["string"]`` will be returned.
 **GetParameters, GetParametersByPath**
-  - If the path contains a node that both has a value and has children and the ``ResultFormat`` is ``NESTED_MAP`` then the result behavior is last parameter in with the same name wins.
+  - If the path contains a node that both has a value and has children and the ``ResultFormat`` is ``NESTED_MAP`` then a ValueError is raised.
 **GetParametersByPath**
   - If ``RelativePath`` is set to ``true`` the the path removed will be up to and including the last occurance of ``/``.
 **PutParameter**
