@@ -89,7 +89,7 @@ def _make_path(parameters, elements):
 	if not elements:
 		return parameters
 	parameters[elements[0]] = {}
-	return _make_or_traverse_path(parameters[elements[0]], elements[1:])
+	return _make_path(parameters[elements[0]], elements[1:])
 
 def _put_parameter(parameter):
 	if isinstance(parameter['Value'], (list, tuple)):
