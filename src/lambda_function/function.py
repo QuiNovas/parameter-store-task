@@ -55,22 +55,39 @@ def _get_parameters_by_path(arguments):
 	if result_format == 'NAME_VALUE' or result_format == 'NESTED_MAP':
 		result = {}
 		for parameter in response['Parameters']:
-			result = {**result, **_transform_parameter(parameter, result_format, '' if not arguments.get('RelativePath') else arguments['Path'])}
+			transformed_parameter = _transform_parameter(parameter, result_format, '' if not arguments.get('RelativePath') else arguments['Path'])
+			if result_format == 'NAME_VALUE':
+				result = {**result, **transformed_parameter}
+			else:
+				_add_parameter(result, transformed_parameter)
 		return result
 	else:
 		raise ValueError('Unknown ResultFormat {} for GetParameters'.format(result_format))
 
+def _add_parameter(parameters, parameter):
+	for key, value in parameter.items():
+		if key in parameters:
+			if isinstance(value, dict) and isinstance(parameters[key], dict):
+				_add_parameter(parameters[key], value)
+			else:
+				raise ValueError('Parameter {} has both a value and children. Use NAME_VALUE format instead'.format(key))
+		else:
+			parameters[key] = value
+
 def _transform_parameter(parameter, result_format, relative_path=''):
-	name = parameter['Name'][relative_path.rfind('/')+1:]
+	name = parameter['Name']
+	if name.startswith('/'):
+		name = name[relative_path.rfind('/')+1:]
 	if result_format == 'NAME_VALUE':
 		return {
 			name: _transform_value(parameter['Value'], parameter['Type'])
 		}
 	elif result_format == 'NESTED_MAP':
 		if parameter['Name'].startswith('/'):
+			result = {}
 			name_elements = parameter['Name'][1:].split('/')
-			result = _make_path({}, name_elements[:-1])
-			result[name_elements[-1:][0]] = _transform_value(parameter['Value'], parameter['Type'])
+			node = _make_path(result, name_elements[:-1])
+			node[name_elements[-1:][0]] = _transform_value(parameter['Value'], parameter['Type'])
 		else:
 			result = {
 				name: _transform_value(parameter['Value'], parameter['Type'])
