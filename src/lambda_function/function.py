@@ -83,9 +83,9 @@ def _transform_parameter(parameter, result_format, relative_path=''):
 			name: _transform_value(parameter['Value'], parameter['Type'])
 		}
 	elif result_format == 'NESTED_MAP':
-		if parameter['Name'].startswith('/'):
+		if name.startswith('/'):
 			result = {}
-			name_elements = parameter['Name'][1:].split('/')
+			name_elements = name[1:].split('/')
 			node = _make_path(result, name_elements[:-1])
 			node[name_elements[-1:][0]] = _transform_value(parameter['Value'], parameter['Type'])
 		else:
